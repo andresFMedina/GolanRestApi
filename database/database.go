@@ -8,13 +8,13 @@ import (
 )
 
 func InitDB() *sql.DB {
-	connectionString := "root:admin@tcp(localhost:3306)/northwind"
+	connectionString := "root:@tcp(localhost:3306)/northwind"
 	fmt.Println(connectionString)
 
 	databaseConnection, err := sql.Open("mysql", connectionString)	
 
 	if err != nil {
-		panic(err.Error()) //Error Handling
+		panic(err) //Error Handling
 	}
 
 	return databaseConnection
