@@ -7,6 +7,8 @@ import (
 //Repository interface
 type Repository interface {
 	GetProductByID(productID int) (*Product, error)
+	GetProducts(params *getProductsRequest) ([]*Product, error)
+	GetTotalProducts()(int, error)
 }
 
 type repository struct {
@@ -16,6 +18,46 @@ type repository struct {
 //NewRepository function
 func NewRepository(databaseConnection *sql.DB) Repository {
 	return &repository{db: databaseConnection}
+}
+
+//GetProducts Method
+func (repo *repository) GetProducts(params *getProductsRequest) ([]*Product, error) {
+	const query = `SELECT id,product_code,product_name,COALESCE(description, ''),
+				   standard_cost, list_price,
+				   category
+				   FROM products
+				   LIMIT ? OFFSET ?`
+	results, err := repo.db.Query(query, params.Limit, params.Offset)
+	if err != nil {
+		panic(err)
+	}
+
+	var products []*Product
+	for results.Next() {
+		product := &Product{}
+		err = results.Scan(&product.ID, &product.ProductCode, &product.ProductName, &product.Description,
+			&product.StandardCost, &product.ListPrice, &product.Category)
+
+		if err != nil {
+			panic(err)
+		}
+		products = append(products, product)
+	}
+
+	return products, err
+}
+
+func (repo *repository) GetTotalProducts() (int, error) {
+	const sql = "SELECT COUNT(*) FROM PRODUCTS"
+	var total int
+	row:= repo.db.QueryRow(sql)
+	err := row.Scan(&total)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return total, nil
 }
 
 //GetProductById method
@@ -39,3 +81,4 @@ func (repo *repository) GetProductByID(productID int) (*Product, error) {
 	return product, err
 
 }
+
