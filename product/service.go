@@ -4,7 +4,8 @@ package products
 type Service interface {
 	GetProductByID(param *getProductByIDRequest) (*Product, error)
 	GetProducts(params *getProductsRequest) (*ProductList, error)
-	InsertProduct(params *getAddProductRequest)(int64, error)
+	InsertProduct(params *getAddProductRequest) (int64, error)
+	UpdateProduct(params *getUpdateProductRequest) (int, error)
 }
 
 type service struct {
@@ -35,6 +36,10 @@ func (s *service) GetProductByID(param *getProductByIDRequest) (*Product, error)
 }
 
 //InsertProduct Method
-func(s *service) InsertProduct(params *getAddProductRequest)(int64, error){
+func (s *service) InsertProduct(params *getAddProductRequest) (int64, error) {
 	return s.repository.InsertProduct(params)
+}
+
+func (s *service) UpdateProduct(params *getUpdateProductRequest) (int, error) {
+	return s.repository.UpdateProduct(params)
 }
