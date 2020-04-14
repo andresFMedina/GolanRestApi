@@ -11,6 +11,7 @@ type Repository interface {
 	GetTotalProducts() (int, error)
 	InsertProduct(params *getAddProductRequest) (int64, error)
 	UpdateProduct(params *getUpdateProductRequest) (int, error)
+	DeleteProduct(param *deleteProductRequest) (int, error)
 }
 
 type repository struct {
@@ -124,6 +125,23 @@ func (repo *repository) UpdateProduct(params *getUpdateProductRequest) (int, err
 	}
 
 	id := params.ID
+
+	return id, nil
+}
+
+// DeleteProduct function
+
+func (repo *repository) DeleteProduct(params *deleteProductRequest) (int, error) {
+	query := `DELETE FROM products
+				WHERE id = ?`
+
+	_, err := repo.db.Exec(query, params.ProductID)
+
+	if err != nil {
+		panic(err)
+	}
+
+	id := params.ProductID
 
 	return id, nil
 }

@@ -34,6 +34,10 @@ type getUpdateProductRequest struct {
 	ProductName  string
 }
 
+type deleteProductRequest struct {
+	ProductID int
+}
+
 func makeGetProductByIDEndPoint(s Service) endpoint.Endpoint {
 	getProductByIDEndPoint := func(context context.Context, request interface{}) (interface{}, error) {
 		req := request.(getProductByIDRequest)
@@ -81,4 +85,17 @@ func makeUpdateProductEndPoint(s Service) endpoint.Endpoint {
 		return result, nil
 	}
 	return updateProductEndPoint
+}
+
+func makeDeleteProductEndPoint(s Service) endpoint.Endpoint {
+	deleteProductEndPoint := func(context context.Context, request interface{}) (interface{}, error) {
+		req := request.(deleteProductRequest)
+		result, err := s.DeleteProduct(&req)
+		if err != nil {
+			panic(err)
+		}
+		return result, nil
+	}
+
+	return deleteProductEndPoint
 }
