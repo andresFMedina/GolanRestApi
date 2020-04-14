@@ -7,6 +7,7 @@ type Service interface {
 	InsertProduct(params *getAddProductRequest) (int64, error)
 	UpdateProduct(params *getUpdateProductRequest) (int, error)
 	DeleteProduct(param *deleteProductRequest) (int, error)
+	GetBestSellers()(*ProductTopResponse, error)
 }
 
 type service struct {
@@ -27,6 +28,9 @@ func (s *service) GetProducts(params *getProductsRequest) (*ProductList, error) 
 		panic(err)
 	}
 	totalProducts, err := s.repository.GetTotalProducts()
+	if err != nil {
+		panic(err)
+	}
 
 	return &ProductList{Data: products, TotalRecords: totalProducts}, nil
 }
@@ -48,3 +52,18 @@ func (s *service) UpdateProduct(params *getUpdateProductRequest) (int, error) {
 func (s *service) DeleteProduct(params *deleteProductRequest) (int, error){
 	return s.repository.DeleteProduct(params)
 }
+
+func (s *service) GetBestSellers()(*ProductTopResponse, error) {
+	products, err := s.repository.GetBestSellerProducts()
+	if err != nil {
+		panic(err)
+	}
+
+	totalSold, err := s.repository.GetTotalSells()
+	if err != nil {
+		panic(err)
+	}
+
+	return &ProductTopResponse{Data: products, TotalSold: totalSold}, nil
+}
+

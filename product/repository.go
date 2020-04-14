@@ -12,6 +12,8 @@ type Repository interface {
 	InsertProduct(params *getAddProductRequest) (int64, error)
 	UpdateProduct(params *getUpdateProductRequest) (int, error)
 	DeleteProduct(param *deleteProductRequest) (int, error)
+	GetBestSellerProducts()([]*ProductTop, error)
+	GetTotalSells()(float64, error)
 }
 
 type repository struct {
@@ -144,4 +146,48 @@ func (repo *repository) DeleteProduct(params *deleteProductRequest) (int, error)
 	id := params.ProductID
 
 	return id, nil
+}
+
+func (repo *repository) GetBestSellerProducts() ([]*ProductTop, error) {
+	query := `SELECT
+				od.product_id,
+				p.product_name,
+				SUM(od.quantity*od.unit_price) sold
+				FROM order_details od
+				inner join products p on od.product_id = p.id
+				group by od.product_id
+				order by sold desc
+				limit 10`
+	
+	results, err := repo.db.Query(query)
+	if err != nil {
+		panic(err)
+	}
+
+	var products []*ProductTop
+
+	for results.Next() {
+		product := &ProductTop{}
+		err = results.Scan(&product.ID, &product.ProductName, &product.Sold)
+		if err != nil {
+			panic(err)
+		}
+		products = append(products, product)
+	}
+
+	return products, nil
+
+}
+
+func (repo *repository) GetTotalSells() (float64, error){
+	const query = `SELECT sum(od.quantity*od.unit_price) sold
+			from order_details od`
+	var total float64
+	row := repo.db.QueryRow(query)
+	err := row.Scan(&total)
+	if err != nil {
+		panic(err)
+	}
+
+	return total, nil
 }
